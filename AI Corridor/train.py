@@ -38,35 +38,43 @@ def main():
 
     model = CNN()
     model.to(device)
+    model.half()
     
     # model training parameters
-    learning_rate = 1e-6
+    learning_rate = 1e-10
     momentum = 0.9
-    step_size = 30
+    step_size = 5
     gamma = 0.1
-    num_epochs = 200
+    num_epochs = 100
 
     # optimizers
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
+    optimizer_adam = optim.Adam(model.parameters(), lr=learning_rate)
+    scheduler = StepLR(optimizer_adam, step_size=step_size, gamma=gamma)
+
+    # if checkpoint is found load the weights and continue training
+    try:
+        model.load_state_dict(torch.load('checkpoints/chkpoint.pth'))
+        print("Checkpoint found, loading weights")
+    except:
+        pass
 
     for epoch in range(num_epochs):
         for batch in dataloader:
             images, labels = batch
-            # print(images.get_device())
-            # print(labels.get_device())
+            images, labels = images.half(), labels.half()
             prediction = model(images)
             loss = model.calculate_rmse_loss(prediction, labels)
-            optimizer.zero_grad()
+            optimizer_adam.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm(model.parameters(), max_norm=1)
-            optimizer.step()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5)
+            optimizer_adam.step()
         scheduler.step() # learning rate decay
         print(f"Epoch : [{epoch+1}/{num_epochs}]; loss: {loss.item()}; lr: {scheduler.get_last_lr()[0]}")
         wandb.log({"loss": loss.item(), "lr": scheduler.get_last_lr()[0]})
 
     # save the best weights
-    torch.save(model.state_dict(), 'checkpoints/chkpoint.pth')
+    torch.save(model.state_dict(), 'checkpoints/chkpoint_adam.pth')
 
     # plot the loss and learning rate
     wandb.finish()

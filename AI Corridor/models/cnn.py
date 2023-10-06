@@ -5,9 +5,6 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# print(device)
-
 class CNN(nn.Module):
     def __init__(self):
         # create a module of conv layer and relu layer
@@ -55,47 +52,94 @@ class CNN(nn.Module):
     def forward(self, x):
         # encoding block
         x = self.bn1(x)
-        x = self.relu(self.conv1(x))
-        x = self.relu(self.conv2(x))
+        x = self.conv1(x)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.relu(x)
         x = self.pool1(x)
 
-        x = self.dropout(self.relu(self.conv3(x)))
-        x = self.dropout(self.relu(self.conv4(x)))
-        x = self.dropout(self.relu(self.conv5(x)))
+        x = self.conv3(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.conv4(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.conv5(x)
+        x = self.relu(x)
+        x = self.dropout(x)
         x = self.pool1(x)
 
-        x = self.dropout(self.relu(self.conv6(x)))
-        x = self.dropout(self.relu(self.conv7(x)))
+        x = self.conv6(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.conv7(x)
+        x = self.relu(x)
+        x = self.dropout(x)
         x = self.pool1(x)
 
-        x = self.dropout(self.relu(self.conv8(x)))
-        x = self.dropout(self.relu(self.conv9(x)))
+        x = self.conv8(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.conv9(x)
+        x = self.relu(x)
+        x = self.dropout(x)
         x = self.pool1(x)
 
         # decoding block
         x = self.deconv1(x)
-        x = self.dropout(self.relu(self.conv10(x)))
-        x = self.dropout(self.relu(self.conv11(x)))
+        x = self.conv10(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.conv11(x)
+        x = self.relu(x)
+        x = self.dropout(x)
 
         x = self.deconv2(x)
-        x = self.dropout(self.relu(self.conv12(x)))
-        x = self.dropout(self.relu(self.conv13(x)))
+        x = self.conv12(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.conv13(x)
+        x = self.relu(x)
+        x = self.dropout(x)
 
         x = self.deconv3(x)
-        x = self.dropout(self.relu(self.conv14(x)))
-        x = self.dropout(self.relu(self.conv15(x)))
-        x = self.dropout(self.relu(self.conv16(x)))
+        x = self.conv14(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.conv15(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.conv16(x)
+        x = self.relu(x)
+        x = self.dropout(x)
 
         x = self.deconv4(x)
-        x = self.relu(self.conv17(x))
-        output = self.relu(self.conv18(x))
+        x = self.conv17(x)
+        x = self.relu(x)
+        x = self.conv18(x)
+        output = self.relu(x)
 
         return output
     
     # define the loss function
     def calculate_rmse_loss(self, prediction, target):
-        loss = torch.sqrt(torch.mean((prediction - target)**2))
+        assert prediction.shape[0] == target.shape[0]
+        assert prediction.shape[1] == target.shape[1]
+        assert prediction.shape[2] == target.shape[2]
+        assert prediction.shape[3] == target.shape[3]
+        
+        mse_loss = nn.MSELoss()
+        loss = torch.sqrt(mse_loss(prediction, target))
         return loss
+
+    # define a binary cross entropy loss function
+    def CalculateBinaryCrossEntropyLoss(self, prediction, target):
+        assert prediction.shape[0] == target.shape[0]
+        assert prediction.shape[1] == target.shape[1]
+        assert prediction.shape[2] == target.shape[2]
+        assert prediction.shape[3] == target.shape[3]
+
+        loss = torch.mean(-target * torch.log(prediction) - (1 - target) * torch.log(1 - prediction))
         
 # main function
 def main():
