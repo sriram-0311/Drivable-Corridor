@@ -9,6 +9,9 @@ from torch.optim.lr_scheduler import StepLR
 import tqdm
 import wandb
 
+torch.set_grad_enabled(True)
+torch.set_printoptions(linewidth=120)
+
 def main():
     # init a wandb project to store loss and learning rates
     wandb.init(
@@ -23,7 +26,7 @@ def main():
             "architecture" : "cnn"
         }
     )
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     dataset_dir = "/scratch/ramesh.anu/BDD/bdd100k/"
     dataset = BDD(dataset_dir)
     dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
@@ -38,12 +41,12 @@ def main():
 
     model = CNN()
     model.to(device)
-    model.half()
+    model.train()
     
     # model training parameters
-    learning_rate = 1e-10
+    learning_rate = 1e-4
     momentum = 0.9
-    step_size = 5
+    step_size = 10
     gamma = 0.1
     num_epochs = 100
 
@@ -62,12 +65,13 @@ def main():
     for epoch in range(num_epochs):
         for batch in dataloader:
             images, labels = batch
-            images, labels = images.half(), labels.half()
+            images, labels = images, labels
             prediction = model(images)
-            loss = model.calculate_rmse_loss(prediction, labels)
             optimizer_adam.zero_grad()
+            loss = model.calculate_rmse_loss(prediction, labels)
+            loss.requires_grad_()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5)
+            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5)
             optimizer_adam.step()
         scheduler.step() # learning rate decay
         print(f"Epoch : [{epoch+1}/{num_epochs}]; loss: {loss.item()}; lr: {scheduler.get_last_lr()[0]}")

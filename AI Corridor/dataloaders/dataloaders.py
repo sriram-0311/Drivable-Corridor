@@ -7,7 +7,7 @@ import cv2 as cv
 import os
 import os.path as osp
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class BDD(data.Dataset):
     def __init__(self, root_dir, training=True):
@@ -25,7 +25,7 @@ class BDD(data.Dataset):
         # print("Number of training images with labels: ", len(self.training_image_with_labels))
         self.transform = transforms.Compose(
             [transforms.ToTensor(),
-            transforms.Normalize(mean=[0], std=[0.5])]
+            transforms.Normalize(mean=[0.5], std=[0.5])]
         )
 
 
@@ -47,9 +47,14 @@ class BDD(data.Dataset):
         image = cv.imread(file_name["image"], 0)
         image = cv.resize(image, (652, 360)).T
         label = cv.resize(cv.imread(file_name["label"], 0), (652, 360)).T
+        label[np.where(label > 0)] = 1
+        # cv.imwrite("sample2.png", label)
+        # print("unique values in image ", np.unique(label))
         image = self.transform(image)
-        label = self.transform(label)
-        return image.to(device), label.to(device)
+        # image = torch.from_numpy(image).unsqueeze(0).float()
+        label = torch.from_numpy(label).unsqueeze(0).float()
+        # label = self.transform(label)
+        return image.to(device).requires_grad_(), label.to(device).requires_grad_()
     
 def test():
     root_dir = "/scratch/ramesh.anu/BDD/bdd100k/"
@@ -72,8 +77,7 @@ def test():
         # print(image.max())
         ax[i, 0].imshow(image.cpu().detach().squeeze(0).T, cmap="gray")
         ax[i, 1].imshow(label.cpu().detach().squeeze(0).T, cmap="gray")
-        ax[i, 2].imshow(image.cpu().detach().squeeze(0).T, cmap="gray")
-        ax[i, 2].imshow(label.cpu().detach().squeeze(0).T, cmap="jet", alpha=0.5)
+        # overlay label on top of image
         ax[i, 0].axis("off")
         ax[i, 1].axis("off")
         ax[i, 2].axis("off")

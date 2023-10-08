@@ -5,6 +5,9 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 
+torch.set_grad_enabled(True)
+torch.set_printoptions(linewidth=120)
+
 class CNN(nn.Module):
     def __init__(self):
         # create a module of conv layer and relu layer
@@ -47,6 +50,9 @@ class CNN(nn.Module):
 
         # define the dropout layers
         self.dropout = nn.Dropout(0.5)
+
+        # softmax activation layer
+        self.softmax = nn.Softmax(dim=1)
 
     # define the forward pass
     def forward(self, x):
@@ -117,9 +123,12 @@ class CNN(nn.Module):
         x = self.conv17(x)
         x = self.relu(x)
         x = self.conv18(x)
-        output = self.relu(x)
+        x = self.relu(x)
+        
+        # activation function
+        # x = self.softmax(x)
 
-        return output
+        return x
     
     # define the loss function
     def calculate_rmse_loss(self, prediction, target):
@@ -132,14 +141,24 @@ class CNN(nn.Module):
         loss = torch.sqrt(mse_loss(prediction, target))
         return loss
 
-    # define a binary cross entropy loss function
-    def CalculateBinaryCrossEntropyLoss(self, prediction, target):
+    # define a loss function to calculate the Dice loss
+    def CalculateDiceLoss(self, prediction, target):
         assert prediction.shape[0] == target.shape[0]
         assert prediction.shape[1] == target.shape[1]
         assert prediction.shape[2] == target.shape[2]
         assert prediction.shape[3] == target.shape[3]
 
-        loss = torch.mean(-target * torch.log(prediction) - (1 - target) * torch.log(1 - prediction))
+        # calculate the dice loss
+        dice_loss = 0
+        smooth = 1e-7
+        for i in range(prediction.shape[0]):
+            intersection = torch.sum(prediction * target)
+            union = torch.sum(prediction) + torch.sum(target)
+            dice_score = (2 * intersection + smooth) / (union + smooth)
+            dice_loss += (1 - dice_score)
+        dice_loss /= prediction.shape[0]
+
+        return dice_loss
         
 # main function
 def main():

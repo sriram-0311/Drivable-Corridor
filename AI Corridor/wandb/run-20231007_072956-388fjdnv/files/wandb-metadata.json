@@ -1,0 +1,188 @@
+{
+    "os": "Linux-3.10.0-1160.25.1.el7.x86_64-x86_64-with-glibc2.17",
+    "python": "3.11.5",
+    "heartbeatAt": "2023-10-07T11:29:57.594399",
+    "startedAt": "2023-10-07T11:29:56.820560",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/ramesh.anu/Drivable-Corridor/AI Corridor/train.py",
+    "codePathLocal": "train.py",
+    "codePath": "AI Corridor/train.py",
+    "git": {
+        "remote": "https://github.com/sriram-0311/Drivable-Corridor.git",
+        "commit": "d0f7dcf887f55d6612ddf30caabecd146679824f"
+    },
+    "email": "ramesh.anu@northeastern.edu",
+    "root": "/home/ramesh.anu/Drivable-Corridor",
+    "host": "d1015",
+    "username": "ramesh.anu",
+    "executable": "/home/ramesh.anu/.conda/envs/torch_gpu/bin/python",
+    "cpu_count": 28,
+    "cpu_count_logical": 28,
+    "cpu_freq": {
+        "current": 1411.0154999999995,
+        "min": 1000.0,
+        "max": 3700.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3399.963,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1029.431,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 3399.963,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1000.073,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1396.96,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1014.196,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 3399.963,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 999.914,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1394.104,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1002.77,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1193.994,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1025.146,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1096.24,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1000.073,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1100.048,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1070.69,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1595.642,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1088.305,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1000.073,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 999.914,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1023.242,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1000.073,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 3400.28,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 999.914,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1149.401,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1000.073,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1200.024,
+            "min": 1000.0,
+            "max": 3700.0
+        },
+        {
+            "current": 1000.073,
+            "min": 1000.0,
+            "max": 3700.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 19.521484375,
+            "used": 10.818244934082031
+        }
+    },
+    "gpu": "Tesla V100-SXM2-32GB",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "Tesla V100-SXM2-32GB",
+            "memory_total": 34359738368
+        }
+    ],
+    "memory": {
+        "total": 187.36168670654297
+    }
+}
