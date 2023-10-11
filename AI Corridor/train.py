@@ -29,7 +29,9 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     dataset_dir = "/scratch/ramesh.anu/BDD/bdd100k/"
     dataset = BDD(dataset_dir)
+    val_dataset = BDD(dataser_dir, training=False)
     dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=16, shuffle=True)
 
     # print the shape of image and label from first sample in each batch
     for batch in dataloader:
@@ -44,9 +46,9 @@ def main():
     model.train()
     
     # model training parameters
-    learning_rate = 1e-4
+    learning_rate = 1e-8
     momentum = 0.9
-    step_size = 10
+    step_size = 15
     gamma = 0.1
     num_epochs = 100
 
@@ -65,20 +67,28 @@ def main():
     for epoch in range(num_epochs):
         for batch in dataloader:
             images, labels = batch
-            images, labels = images, labels
             prediction = model(images)
-            optimizer_adam.zero_grad()
+            optimizer.zero_grad()
             loss = model.calculate_rmse_loss(prediction, labels)
             loss.requires_grad_()
             loss.backward()
-            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5)
-            optimizer_adam.step()
+            optimizer.step()
         scheduler.step() # learning rate decay
-        print(f"Epoch : [{epoch+1}/{num_epochs}]; loss: {loss.item()}; lr: {scheduler.get_last_lr()[0]}")
-        wandb.log({"loss": loss.item(), "lr": scheduler.get_last_lr()[0]})
+        # calculate the accuracy of the model on validation data
+        correct = 0
+        total = 0
+        for batch in val_dataloader:
+            images, labels = batch
+            prediction = model(images)
+            val_loss = model.calculate_rmse_loss(prediction, labels)
+            total += labels.shape(0)
+            correct += (prediction == labels).sum().item()
+        accuracy = 100 * correct / total
+        print(f"Epoch : [{epoch+1}/{num_epochs}]; loss: {loss.item()}; lr: {scheduler.get_last_lr()[0]}; val_loss: {val_loss.item()}; accuracy: {accuracy}")
+        wandb.log({"loss": loss.item(), "lr": scheduler.get_last_lr()[0], "validation loss": val_loss.item(), "accuracy": accuracy})
 
     # save the best weights
-    torch.save(model.state_dict(), 'checkpoints/chkpoint_adam.pth')
+    torch.save(model.state_dict(), 'checkpoints/chkpoint_sgb.pth')
 
     # plot the loss and learning rate
     wandb.finish()

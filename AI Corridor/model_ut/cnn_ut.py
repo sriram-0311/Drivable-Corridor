@@ -15,7 +15,6 @@ def AssertVariablesChange():
     bdd = BDD(root_dir)
     dataloader = DataLoader(bdd, batch_size=1, shuffle=True)
     batch = next(iter(dataloader))
-    print(batch[0].shape)
     cnn = CNN()
     cnn.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     # print range of values and number of values in between those in batch[0]
@@ -24,7 +23,7 @@ def AssertVariablesChange():
     assert_vars_change(
         model=cnn,
         batch=batch,
-        loss_fn=cnn.calculate_rmse_loss,
+        loss_fn=cnn.CalculateDiceLoss,
         optim=torch.optim.SGD(cnn.parameters(), lr=0.001),
         device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     )

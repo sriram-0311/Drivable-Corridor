@@ -13,7 +13,9 @@ class BDD(data.Dataset):
     def __init__(self, root_dir, training=True):
         self.root_dir = root_dir
         self.training_path = "images/10k/train/"
-        self.labels_path = "labels/drivable/colormaps/train/"
+        self.validation_path  = "images/10k/val"
+        self.labels_path = "labels/drivable/masks/train/"
+        self.train_data = training
 
         self.training_image_names = [name.split(".")[0] for name in os.listdir(self.root_dir + self.training_path)]
         self.labels = [name.split(".")[0] for name in os.listdir(self.root_dir + self.labels_path)]
@@ -28,16 +30,30 @@ class BDD(data.Dataset):
             transforms.Normalize(mean=[0.5], std=[0.5])]
         )
 
+        # if training data is asked
+        if self.train_data:
+            self.files = []
+            for name in self.training_image_with_labels:
+                image_name = os.path.join(self.root_dir + self.training_path, name + ".jpg")
+                label_name = os.path.join(self.root_dir + self.labels_path, name + ".png")
+                self.files.append({
+                    "image": image_name,
+                    "label": label_name
+                })
 
-
-        self.files = []
-        for name in self.training_image_with_labels:
-            image_name = os.path.join(self.root_dir + self.training_path, name + ".jpg")
-            label_name = os.path.join(self.root_dir + self.labels_path, name + ".png")
-            self.files.append({
-                "image": image_name,
-                "label": label_name
-            })
+        # if validation data is asked
+        else:
+            self.files = []
+            self.validation_image_names = [names.split(".")[0] for name in os.listdir(self.root_dir) + self.validation_path]
+            self.validation_images_with_labels = list(set(self.validation_image_names).intersection(self.labels))
+            for name in self.validation_images_with_labels:
+                image_name = os.path.join(self.root_dir + self.validation_path, name + ".jpg")
+                label_name = os.path.join(self.root_dir + self.labels_path, name + ".png")
+                self.files.append({
+                    "image": image_name,
+                    "label": label_name
+                })
+        
 
     def __len__(self):
         return len(self.training_image_with_labels)
@@ -47,13 +63,14 @@ class BDD(data.Dataset):
         image = cv.imread(file_name["image"], 0)
         image = cv.resize(image, (652, 360)).T
         label = cv.resize(cv.imread(file_name["label"], 0), (652, 360)).T
-        label[np.where(label > 0)] = 1
-        # cv.imwrite("sample2.png", label)
-        # print("unique values in image ", np.unique(label))
+        # make the pixels where label value = 2 as 0 and where value = 0 as 1
+        two_indices = np.where(label == 2)
+        one_indices = np.where(label == 1)
+        label[one_indices] = 0
+        label[label == 0] = 1
+        label[two_indices] = 0
         image = self.transform(image)
-        # image = torch.from_numpy(image).unsqueeze(0).float()
-        label = torch.from_numpy(label).unsqueeze(0).float()
-        # label = self.transform(label)
+        label = torch.from_numpy(np.reshape(label, (1,652,360))).float()
         return image.to(device).requires_grad_(), label.to(device).requires_grad_()
     
 def test():

@@ -49,7 +49,7 @@ class CNN(nn.Module):
         self.bn1 = nn.BatchNorm2d(1)
 
         # define the dropout layers
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.9)
 
         # softmax activation layer
         self.softmax = nn.Softmax(dim=1)
@@ -138,27 +138,21 @@ class CNN(nn.Module):
         assert prediction.shape[3] == target.shape[3]
         
         mse_loss = nn.MSELoss()
-        loss = torch.sqrt(mse_loss(prediction, target))
+        loss = mse_loss(prediction, target)
         return loss
 
     # define a loss function to calculate the Dice loss
     def CalculateDiceLoss(self, prediction, target):
-        assert prediction.shape[0] == target.shape[0]
-        assert prediction.shape[1] == target.shape[1]
-        assert prediction.shape[2] == target.shape[2]
-        assert prediction.shape[3] == target.shape[3]
-
-        # calculate the dice loss
-        dice_loss = 0
         smooth = 1e-7
-        for i in range(prediction.shape[0]):
-            intersection = torch.sum(prediction * target)
-            union = torch.sum(prediction) + torch.sum(target)
-            dice_score = (2 * intersection + smooth) / (union + smooth)
-            dice_loss += (1 - dice_score)
-        dice_loss /= prediction.shape[0]
-
-        return dice_loss
+        # print(torch.unique(prediction))
+        # apply sigmoid on each pixel to convert pixel values to be between 0 and 1
+        predicted_probabilities = torch.sigmoid(prediction)
+        # print(torch.unique(predicted_probabilities))
+        prediction_flat = prediction.view(-1)
+        target_flat = target.view(-1)
+        intersection = (prediction_flat * target_flat).sum()
+        # print(torch.mean(1. - ((2. * intersection + smooth) / (prediction_flat.sum() + target_flat.sum() + smooth))))
+        return  (1. - ((2. * intersection + smooth) / (prediction_flat.sum() + target_flat.sum() + smooth)))/prediction.shape[0]
         
 # main function
 def main():
