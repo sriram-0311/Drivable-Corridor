@@ -13,34 +13,38 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     rootd =  "/scratch/ramesh.anu/BDD/bdd100k/"
-    test_images = "images/10k/test/"
+    test_images = "images/10k/train/"
 
     test_files = os.listdir(rootd + test_images)
 
     # load the model
     model = CNN()
-    model.load_state_dict(torch.load('checkpoints/chkpoint_adam.pth'))
+    model.load_state_dict(torch.load('checkpoints/chkpoint_sgb_250_epocs.pth'))
     model.eval()
     model.to(device)
 
-    # load the image
-    test_image = np.random.choice(test_files)
-    image = cv.imread(rootd+test_images+test_image, 0)
-    image = cv.resize(image, (652, 360)).T
-    image = transforms.ToTensor()(image).to(device)
-    image = image.reshape(1, image.shape[0], image.shape[1], image.shape[2])
+    # load image using the bdd dataloader
+    bdd_dataset = BDD(rootd)
+    random_choice_image_index = np.random.choice(range(len(bdd_dataset)))
+    img, lbl = bdd_dataset[random_choice_image_index]
+    img = img.reshape(1,img.shape[0], img.shape[1], img.shape[2])
+    # print(torch.unique(img))
     
     # predict the output
-    output = model(image)
-    print(torch.unique(output))
+    output = model(img)
+    # apply inverse sigmoid on the output
+    print("test 1 ",torch.unique(output))
+    output = torch.sigmoid(output)
+    print("test 2",torch.unique(output))
     output = output.cpu().detach().numpy()
     output = np.squeeze(output)
-    # output = np.where(output > 0, 255, 0)
+    output = np.where(output > 0.5, 255, 0)
+    print(np.unique(output))
     
     # plot the output
     _, ax = plt.subplots(1, 2)
-    ax[0].imshow(image.cpu().detach().numpy().squeeze().T, cmap='gray')
-    ax[1].imshow(output.T, cmap='gray')
+    ax[0].imshow(img.cpu().detach().numpy().squeeze().T, cmap='gray')
+    ax[1].imshow(output.T)
     plt.savefig("prediction.png")
 
 if __name__ == "__main__":

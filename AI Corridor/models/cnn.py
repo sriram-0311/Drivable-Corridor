@@ -49,10 +49,10 @@ class CNN(nn.Module):
         self.bn1 = nn.BatchNorm2d(1)
 
         # define the dropout layers
-        self.dropout = nn.Dropout(0.9)
+        self.dropout = nn.Dropout(0)
 
-        # softmax activation layer
-        self.softmax = nn.Softmax(dim=1)
+        # sigmoid activation layer
+        self.sigmoid = nn.Sigmoid()
 
     # define the forward pass
     def forward(self, x):
@@ -123,10 +123,7 @@ class CNN(nn.Module):
         x = self.conv17(x)
         x = self.relu(x)
         x = self.conv18(x)
-        x = self.relu(x)
-        
-        # activation function
-        # x = self.softmax(x)
+        # x = self.relu(x)
 
         return x
     
@@ -146,13 +143,25 @@ class CNN(nn.Module):
         smooth = 1e-7
         # print(torch.unique(prediction))
         # apply sigmoid on each pixel to convert pixel values to be between 0 and 1
-        predicted_probabilities = torch.sigmoid(prediction)
+        # predicted_probabilities = torch.sigmoid(prediction)
         # print(torch.unique(predicted_probabilities))
         prediction_flat = prediction.view(-1)
         target_flat = target.view(-1)
         intersection = (prediction_flat * target_flat).sum()
         # print(torch.mean(1. - ((2. * intersection + smooth) / (prediction_flat.sum() + target_flat.sum() + smooth))))
         return  (1. - ((2. * intersection + smooth) / (prediction_flat.sum() + target_flat.sum() + smooth)))/prediction.shape[0]
+
+    # define bce loss with logits
+    def bceloss(self, prediction, target):
+        loss_fn = nn.BCEWithLogitsLoss()
+        return loss_fn(prediction, target)
+    
+    # define calculate accuracy of model using IoU metric
+    def accuracy(self, prediction, target):
+        prediction = torch.where(torch.sigmoid(prediction) > 0.5, 1, 0)
+        intersection = (prediction * target).sum()
+        union = (prediction + target).sum()
+        return (intersection + 1e-7) / ((union + 1e-7) * prediction.shape[0])
         
 # main function
 def main():

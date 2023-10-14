@@ -3,11 +3,12 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 from dataloaders.dataloaders import BDD
 from models.cnn import CNN
-from torch.utils.data import DataLoader
+from torch.utils.data import Subset, DataLoader
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
-import tqdm
+from tqdm import tqdm
 import wandb
+import numpy as np
 
 torch.set_grad_enabled(True)
 torch.set_printoptions(linewidth=120)
@@ -27,12 +28,17 @@ def main():
         }
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    subset_size = 5000
+    val_subset_size = 1000
     dataset_dir = "/scratch/ramesh.anu/BDD/bdd100k/"
     dataset = BDD(dataset_dir)
-    val_dataset = BDD(dataser_dir, training=False)
-    dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
-    val_dataloader = DataLoader(val_dataset, batch_size=16, shuffle=True)
-
+    subset_indices = np.random.randint(0, len(dataset), subset_size)
+    dataset_subset = Subset(dataset, subset_indices)
+    dataloader = DataLoader(dataset_subset, batch_size=32, shuffle=True)
+    val_dataset = BDD(dataset_dir, training=False)
+    val_subset_indices = np.random.randint(0, len(val_dataset), val_subset_size)
+    val_dataset_subset = Subset(val_dataset, val_subset_indices)
+    val_dataloader = DataLoader(val_dataset_subset, batch_size=32, shuffle=True) 
     # print the shape of image and label from first sample in each batch
     for batch in dataloader:
         images, labels = batch
@@ -43,14 +49,13 @@ def main():
 
     model = CNN()
     model.to(device)
-    model.train()
     
     # model training parameters
-    learning_rate = 1e-8
+    learning_rate = 1e-3
     momentum = 0.9
-    step_size = 15
+    step_size = 25
     gamma = 0.1
-    num_epochs = 100
+    num_epochs = 50
 
     # optimizers
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -65,30 +70,32 @@ def main():
         pass
 
     for epoch in range(num_epochs):
-        for batch in dataloader:
+        model.train()
+        for batch in tqdm(dataloader):
             images, labels = batch
             prediction = model(images)
             optimizer.zero_grad()
-            loss = model.calculate_rmse_loss(prediction, labels)
+            loss = model.bceloss(prediction, labels)
             loss.requires_grad_()
             loss.backward()
             optimizer.step()
         scheduler.step() # learning rate decay
         # calculate the accuracy of the model on validation data
-        correct = 0
-        total = 0
-        for batch in val_dataloader:
+        accuracy = 0
+        model.eval()
+        for batch in tqdm(val_dataloader):
             images, labels = batch
-            prediction = model(images)
-            val_loss = model.calculate_rmse_loss(prediction, labels)
-            total += labels.shape(0)
-            correct += (prediction == labels).sum().item()
-        accuracy = 100 * correct / total
-        print(f"Epoch : [{epoch+1}/{num_epochs}]; loss: {loss.item()}; lr: {scheduler.get_last_lr()[0]}; val_loss: {val_loss.item()}; accuracy: {accuracy}")
-        wandb.log({"loss": loss.item(), "lr": scheduler.get_last_lr()[0], "validation loss": val_loss.item(), "accuracy": accuracy})
+            val_prediction = model(images)
+            val_loss = model.bceloss(val_prediction, labels)
+            accuracy += model.accuracy(val_prediction, labels)
+        accuracy /= len(val_dataloader)
+        print(f"in epoch {epoch} validation values predicted : ", torch.unique(prediction))
+        # print(accuracy)
+        print(f"Epoch : [{epoch+1}/{num_epochs}]; loss: {loss.item()}; lr: {scheduler.get_last_lr()[0]}; val_loss: {val_loss.item()}; val_accuracy: {accuracy}")
+        wandb.log({"loss": loss.item(), "lr": scheduler.get_last_lr()[0], "val_loss": val_loss.item(), "val_accuracy": accuracy})
 
     # save the best weights
-    torch.save(model.state_dict(), 'checkpoints/chkpoint_sgb.pth')
+    torch.save(model.state_dict(), 'checkpoints/chkpoint_sgb_250_epocs.pth')
 
     # plot the loss and learning rate
     wandb.finish()

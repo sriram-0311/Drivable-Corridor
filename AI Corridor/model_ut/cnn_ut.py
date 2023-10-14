@@ -13,18 +13,19 @@ from torch.utils.data import DataLoader
 def AssertVariablesChange():
     root_dir = "/scratch/ramesh.anu/BDD/bdd100k/"
     bdd = BDD(root_dir)
-    dataloader = DataLoader(bdd, batch_size=1, shuffle=True)
+    dataloader = DataLoader(bdd, batch_size=32, shuffle=True)
     batch = next(iter(dataloader))
     cnn = CNN()
     cnn.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+    print("number of model params ",sum(p.numel() for p in cnn.parameters() if p.requires_grad))
     # print range of values and number of values in between those in batch[0]
     # print("range :", torch.max(batch[0]), torch.min(batch[0]))
     # print("number of unique values : ", torch.unique(batch[0]))
     assert_vars_change(
         model=cnn,
         batch=batch,
-        loss_fn=cnn.CalculateDiceLoss,
-        optim=torch.optim.SGD(cnn.parameters(), lr=0.001),
+        loss_fn=cnn.bceloss,
+        optim=torch.optim.SGD(cnn.parameters(), lr=0.05),
         device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     )
 
