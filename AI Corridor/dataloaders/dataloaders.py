@@ -71,11 +71,11 @@ class BDD(data.Dataset):
     def __getitem__(self, index):
         file_name = self.files[index]
         image = cv.imread(file_name["image"], 0)
-        image = cv.resize(image, (652, 360)).T
+        image = cv.resize(image, (640, 360)).T
         image = np.array(image, dtype=np.uint8)
         # scale the input image to be between -4 and 4
         # image = np.interp(image, (0,255), (self.min_val, self.max_val))
-        label = cv.resize(cv.imread(file_name["label"], 0), (652, 360)).T
+        label = cv.resize(cv.imread(file_name["label"], 0), (640, 360)).T
         label = np.array(label, dtype=np.uint8)
         # make the pixels where label value = 2 as 0 and where value = 0 as 1
         two_indices = np.where(label == 2)
@@ -85,7 +85,7 @@ class BDD(data.Dataset):
         label[two_indices] = 0
         image = self.transform(image)
         # image = torch.from_numpy(np.reshape(image, (1,652,360))).float()
-        label = torch.from_numpy(np.reshape(label, (1,652,360))).float()
+        label = torch.from_numpy(np.reshape(label, (1,640,360))).float()
         return image.to(device).requires_grad_(), label.to(device).requires_grad_()
     
 def test():

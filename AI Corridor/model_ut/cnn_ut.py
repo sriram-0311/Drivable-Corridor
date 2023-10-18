@@ -24,8 +24,8 @@ def AssertVariablesChange():
     assert_vars_change(
         model=cnn,
         batch=batch,
-        loss_fn=cnn.bceloss,
-        optim=torch.optim.SGD(cnn.parameters(), lr=0.05),
+        loss_fn=cnn.calculate_rmse_loss,
+        optim=torch.optim.Adam(cnn.parameters(), 0.01),
         device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     )
 

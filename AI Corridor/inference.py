@@ -19,7 +19,7 @@ def main():
 
     # load the model
     model = CNN()
-    model.load_state_dict(torch.load('checkpoints/chkpoint_sgb_250_epocs.pth'))
+    model.load_state_dict(torch.load('checkpoints/chkpoint_sgb_50_epocs.pth'))
     model.eval()
     model.to(device)
 

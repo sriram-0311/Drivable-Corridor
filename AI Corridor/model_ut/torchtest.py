@@ -72,8 +72,11 @@ def _train_step(model, loss_fn, optim, batch, device):
   loss = loss_fn(likelihood, targets)
   # backward
   loss.backward()
-  print(f"testing loss: {loss}")
+  # print(f"testing loss: {loss}")
   print(list(model.parameters())[-1].grad, "gradient0")
+  # print all parameters with their gradients in reverse order
+  # for param in list(model.parameters())[::-1]:
+  #   print(param.grad)
   # optimization step
   optim.step()
 

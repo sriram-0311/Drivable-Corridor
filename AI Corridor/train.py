@@ -15,14 +15,20 @@ torch.set_printoptions(linewidth=120)
 
 def main():
     # init a wandb project to store loss and learning rates
+       # model training parameters
+    learning_rate = 2e-4
+    momentum = 0.9
+    step_size = 10
+    gamma = 0.5
+    num_epochs = 100
     wandb.init(
         project="bdd100k",
         config={
-            "learning_rate": 1e-6,
-            "momentum": 0.9,
-            "step_size": 30,
-            "gamma": 0.1,
-            "num_epochs": 200,
+            "learning_rate": learning_rate,
+            "momentum": momentum,
+            "step_size": step_size,
+            "gamma": gamma,
+            "num_epochs": num_epochs,
             "dataset" : "bdd100",
             "architecture" : "cnn"
         }
@@ -49,13 +55,6 @@ def main():
 
     model = CNN()
     model.to(device)
-    
-    # model training parameters
-    learning_rate = 1e-3
-    momentum = 0.9
-    step_size = 25
-    gamma = 0.1
-    num_epochs = 50
 
     # optimizers
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -74,12 +73,11 @@ def main():
         for batch in tqdm(dataloader):
             images, labels = batch
             prediction = model(images)
-            optimizer.zero_grad()
+            optimizer_adam.zero_grad()
             loss = model.bceloss(prediction, labels)
             loss.requires_grad_()
             loss.backward()
-            optimizer.step()
-        scheduler.step() # learning rate decay
+            optimizer_adam.step()
         # calculate the accuracy of the model on validation data
         accuracy = 0
         model.eval()
@@ -89,13 +87,13 @@ def main():
             val_loss = model.bceloss(val_prediction, labels)
             accuracy += model.accuracy(val_prediction, labels)
         accuracy /= len(val_dataloader)
-        print(f"in epoch {epoch} validation values predicted : ", torch.unique(prediction))
-        # print(accuracy)
+        print(f"in epoch {epoch} validation values predicted : ", torch.unique(val_prediction))
         print(f"Epoch : [{epoch+1}/{num_epochs}]; loss: {loss.item()}; lr: {scheduler.get_last_lr()[0]}; val_loss: {val_loss.item()}; val_accuracy: {accuracy}")
         wandb.log({"loss": loss.item(), "lr": scheduler.get_last_lr()[0], "val_loss": val_loss.item(), "val_accuracy": accuracy})
+        scheduler.step()
 
     # save the best weights
-    torch.save(model.state_dict(), 'checkpoints/chkpoint_sgb_250_epocs.pth')
+    torch.save(model.state_dict(), 'checkpoints/chkpoint_sgd_100_epocs.pth')
 
     # plot the loss and learning rate
     wandb.finish()
