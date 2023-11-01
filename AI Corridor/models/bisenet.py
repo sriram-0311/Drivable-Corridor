@@ -10,36 +10,32 @@ torch.set_printoptions(linewidth=120)
 
 # feature fusion network
 class FFN(nn.Module):
-    def __init__(self):
+    def __init__(self, spatial_features, context_features):
         super(FFN, self).__init__()
-        # define the conv layer
-        self.conv1 = nn.Conv2d(1024, 256, kernel_size=1)
-        self.1x1conv1 = nn.Conv2d(256, 256, kernel_size=1)
-        self.1x1conv2 = nn.Conv2d(256, 256, kernel_size=1)
-        self.bn = nn.BatchNorm2d(256)
+        self.if1 = spatial_features.shape[1]
+        self.if2 = context_features.shape[1]
+        
+        # define the conv + bn + relu unit
+        self.conv1 = nn.Conv2d((self.if1+self.if2), 512, kernel_size=3)
+        self.bn = nn.BatchNorm2d(512)
         self.relu = nn.ReLU()
-        self.avgpool = nn.AvgPool2d(kernel_size=in_features.shape[2:])
+
+        self.avgpool = nn.AvgPool2d(kernel_size=512)
+
+        self.1x1conv = nn.Conv2d(512, 512, kernel_size=1)
+        # self.1x1conv2 = nn.Conv2d(512, 512, kernel_size=1)
+        
 
     def forward(self, x, y):
-        # get the conv layer
-        x = self.conv1(x)
-        # get the batch normalization layer
-        x = self.bn(x)
-        # get the relu activation layer
-        x = self.relu(x)
-        # get the avgpool layer
-        x = self.avgpool(x)
-        # get the 1x1 conv layer
-        x = self.1x1conv1(x)
-        # get the relu activation layer
-        x = self.relu(x)
-        # get the 1x1 conv layer
-        x = self.1x1conv2(x)
-        # get the sigmoid activation layer
-        x = torch.sigmoid(x, dim=-1)
-        # multiply the x and y
-        out = x*y
-        return (out)
+        # concatenate the spatial and context features
+        x = torch.cat((x, y), dim=1)
+        x = self.relu(self.bn(self.conv1(x)))
+        y = self.avgpool(x)
+        y = self.relu(self.1x1conv(x))
+        y = self.1x1conv(x)
+        y = torch.sigmoid(x)
+        
+        return (x*y + x)
 
 # attention refinement network
 class ARN(nn.Module):
