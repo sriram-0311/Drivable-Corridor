@@ -1,8 +1,12 @@
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
-from dataloaders.dataloaders import BDD
-from models.cnn import CNN
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from drivable_corridor.data.dataloaders import BDD
+from drivable_corridor.models.cnn import CNN
 from torch.utils.data import Subset, DataLoader
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
@@ -63,7 +67,7 @@ def main():
 
     # if checkpoint is found load the weights and continue training
     try:
-        model.load_state_dict(torch.load('checkpoints/chkpoint.pth'))
+        model.load_state_dict(torch.load('../models/chkpoint.pth'))
         print("Checkpoint found, loading weights")
     except:
         pass
@@ -93,7 +97,7 @@ def main():
         scheduler.step()
 
     # save the best weights
-    torch.save(model.state_dict(), 'checkpoints/chkpoint_sgd_100_epocs.pth')
+    torch.save(model.state_dict(), '../models/chkpoint_sgd_100_epocs.pth')
 
     # plot the loss and learning rate
     wandb.finish()

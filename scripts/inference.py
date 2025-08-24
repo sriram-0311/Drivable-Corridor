@@ -2,11 +2,14 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
-from models.cnn import CNN
-from torch.utils.data import DataLoader
-from dataloaders.dataloaders import BDD
-from torchvision import transforms
+import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from drivable_corridor.models.cnn import CNN
+from drivable_corridor.data.dataloaders import BDD
+from torch.utils.data import DataLoader
+from torchvision import transforms
 
 def main():
     #define cuda device if available
@@ -19,7 +22,7 @@ def main():
 
     # load the model
     model = CNN()
-    model.load_state_dict(torch.load('checkpoints/chkpoint_sgb_50_epocs.pth'))
+    model.load_state_dict(torch.load('../models/chkpoint_sgb_50_epocs.pth'))
     model.eval()
     model.to(device)
 

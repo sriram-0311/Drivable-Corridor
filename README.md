@@ -50,32 +50,43 @@ Implementing BiSeNet-inspired dual-path architecture:
 
 ### Prerequisites
 ```bash
-pip install torch torchvision opencv-python matplotlib numpy tqdm wandb
+pip install -r requirements.txt
+pip install -e .  # Install in development mode
 ```
 
 ### Training
-```python
-python "AI Corridor/train.py"
+```bash
+cd scripts
+python train.py
 ```
 
 ### Inference
-```python
-python "AI Corridor/inference.py"
+```bash
+cd scripts
+python inference.py
 ```
 
 ## 📁 Project Structure
 
 ```
 Drivable-Corridor/
-├── AI Corridor/
+├── src/drivable_corridor/
 │   ├── models/
 │   │   ├── cnn.py              # Main U-Net style CNN architecture
 │   │   └── bisenet.py          # Advanced BiSeNet implementation
-│   ├── dataloaders/
+│   ├── data/
 │   │   └── dataloaders.py      # BDD100K dataset handling
-│   ├── checkpoints/            # Trained model weights
+│   └── utils/                  # Utility functions
+├── scripts/
 │   ├── train.py               # Training pipeline with W&B logging
 │   └── inference.py           # Model evaluation and visualization
+├── tests/                     # Unit tests and model tests
+├── models/                    # Trained model checkpoints
+├── docs/                      # Documentation
+├── notebooks/                 # Jupyter notebooks for experiments
+├── data/                      # Dataset storage
+├── requirements.txt           # Python dependencies
+├── setup.py                   # Package installation
 └── README.md
 ```
 
