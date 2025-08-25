@@ -5,8 +5,8 @@
 Your development environment for the Drivable Corridor project is now fully configured with all necessary libraries:
 
 ### ✅ Core Deep Learning Libraries
-- **PyTorch 2.8.0+cpu** - Neural network framework
-- **TorchVision 0.23.0+cpu** - Computer vision utilities
+- **PyTorch 2.5.1+cu121** - Neural network framework with CUDA support
+- **TorchVision 0.20.1+cu121** - Computer vision utilities with GPU acceleration
 - **NumPy 2.1.2** - Numerical computing
 
 ### ✅ Computer Vision & Image Processing
@@ -41,7 +41,9 @@ All core functionality has been tested and verified:
 - **Python Version**: 3.11.9
 - **Installation Location**: `C:\Users\aramesh\AppData\Local\Programs\Python\Python311`
 - **Package Manager**: pip 25.2 (latest)
-- **Compute**: CPU-only PyTorch (suitable for development and inference)
+- **GPU**: NVIDIA RTX 2000 Ada Generation (8.2 GB VRAM)
+- **CUDA**: 12.1 (compatible with system CUDA 12.2)
+- **Compute**: GPU-accelerated PyTorch for fast training and inference
 
 ## 🛠️ How to Use
 
@@ -97,8 +99,10 @@ Your environment is now ready to implement the future work items mentioned in yo
 
 ## 📝 Notes
 
-- **CUDA**: Currently using CPU-only PyTorch. For GPU acceleration, reinstall with CUDA support if you have a compatible GPU
+- **GPU Acceleration**: NVIDIA RTX 2000 Ada Generation provides significant speedup for training
+- **CUDA Memory**: 8.2 GB VRAM allows training of large models and batch sizes
 - **Dataset**: The BDD100K dataset needs to be downloaded separately for training
 - **Models**: Pre-trained checkpoints are available in the `models/` directory
+- **Performance**: GPU training is 10-50x faster than CPU for deep learning workloads
 
 Your professional Python project structure combined with a complete ML development environment makes this repository ready for both development and showcasing to recruiters! 🚀

@@ -165,6 +165,26 @@ cython_debug/
 
 # VS Code
 .vscode/
+*.code-workspace
+
+# Visual Studio Code - User specific files
+*.code-workspace
+
+# Visual Studio Code - Extension specific files
+.history/
+
+# Visual Studio Code - Settings that shouldn't be shared
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
 
 # Dataset and model files
 data/raw/
