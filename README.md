@@ -54,6 +54,8 @@ pip install -r requirements.txt
 pip install -e .  # Install in development mode
 ```
 
+> 📋 **New to the project?** See our [complete environment setup guide](ENVIRONMENT_SETUP.md) for detailed installation instructions and dependency verification.
+
 ### Training
 ```bash
 cd scripts
